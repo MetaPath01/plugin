@@ -1,0 +1,373 @@
+openapi: 3.0.1
+info:
+  title: meta path Plugin
+  description: A plugin that allows the user to query coins swap data and nfts information by meta path using ChatGPT.".
+  version: 'v1'
+servers:
+  - url: https://chatgpt-plugin.paths.finance/
+paths:
+  /api/getBaseInfo:
+    get:
+      operationId: get_coin_lists
+      summary: Get Base Info
+      description: Get base information on supported chains
+      responses:
+        '200':
+          description: Returns a list of supported chains
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportedChainsResponse'
+        '500':
+          description: Error fetching data from API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v2/meta/recentlyListed:
+    get:
+      operationId: get_recent_nfts
+      summary: Get Recently Listed NFTs
+      description: Get a list of recently listed NFTs
+      responses:
+        '200':
+          description: Returns a list of recently listed NFTs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecentlyListedNFTsResponse'
+        '500':
+          description: Error fetching data from API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v2/meta/topCollections:
+    get:
+      operationId: get_top_nfts
+      summary: Get Top Collections
+      description: Get a list of top NFT collections
+      responses:
+        '200':
+          description: Returns a list of top NFT collections
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopCollectionsResponse'
+        '500':
+          description: Error fetching data from API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v2/meta/getUserAssets:
+    get:
+      operationId: get_nfts_by_user
+      summary: Get User Assets
+      description: Get a list of NFT assets owned by a user
+      parameters:
+        - in: query
+          name: owner
+          description: The address of the user to query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns a list of NFT assets owned by the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAssetsResponse'
+        '500':
+          description: Error fetching data from API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/exchangeRecord/getTransDetail:
+    get:
+      operationId: get_trans_detail
+      summary: Get Transaction Details
+      description: Get details for a specific transaction
+      parameters:
+        - in: query
+          name: hash
+          description: The hash of the transaction to query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns details for the transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetailsResponse'
+        '500':
+          description: Error fetching data from API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/commonSwap:
+    get:
+      operationId: get_quote_between_two_tokens
+      summary: Swap Tokens
+      description: Swap tokens on a specific DEX
+      parameters:
+        - in: query
+          name: fromTokenName
+          description: The name of the token to swap from
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: toTokenName
+          description: The address of the token to swap to
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: fromTokenAmount
+          description: The amount of the token to swap from
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: wallet_address
+          description: The address of the receiver
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: fromTokenChain
+          description: The chain of the token to swap from
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: toTokenChain
+          description: The chain of the token to swap to
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns details for the swap transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SwapResponse'
+        '500':
+          description: Error fetching data from API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    SupportedChainsResponse:
+      type: object
+      properties:
+        chains:
+          type: array
+          items:
+            type: string
+    RecentlyListedNFTsResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          name:
+            type: string
+          contractAddress:
+            type: string
+          floorPrice:
+            type: string
+          imageUrl:
+            type: string
+          vol:
+            type: string
+          volPercent:
+            type: string
+          symbol:
+            type: string
+          description:
+            type: string
+          bannerUrl:
+            type: string
+          nftImage:
+            type: string
+          ind:
+            type: number
+    TopCollectionsResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          owners:
+            type: number
+          name:
+            type: string
+          contractAddress:
+            type: string
+          floorPrice:
+            type: string
+          imageUrl:
+            type: string
+          vol:
+            type: string
+          volPercent:
+            type: string
+          symbol:
+            type: string
+          bannerUrl:
+            type: string
+          ind:
+            type: number
+          supply:
+            type: number
+    UserAssetsResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          image:
+            type: string
+          description:
+            type: string
+          owner:
+            type: string
+          price:
+            type: number
+          currency:
+            type: string
+    TransactionDetailsResponse:
+      type: object
+      properties:
+        txHash:
+          type: string
+        fromTokenAddress:
+          type: string
+        fromTokenChain:
+          type: string
+        fromTokenSymbol:
+          type: number
+        fromTokenUrl:
+          type: number
+        toTokenAddress:
+          type: string
+        toTokenChain:
+          type: string
+        toTokenSymbol:
+          type: number
+        toTokenUrl:
+          type: number
+        fromAmount:
+          type: number
+        toAmount:
+          type: string
+        finalStatus: 
+          type: string
+        createTime:
+          type: string
+        estimatedTime:
+          type: string
+        dexName:
+          type: string
+        refundAddress:
+          type: string
+        receiveAddress:
+          type: string
+        logoUrl:
+          type: string
+        status:
+          type: array
+          items:
+            type: object
+            properties:
+              chain: 
+                type: string
+              txHash: 
+                type: string
+              url: 
+                type: string
+              status: 
+                type: string
+        nfts:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            contractAddress:
+              type: string
+            floorPrice:
+              type: string
+            imageUrl:
+              type: string
+            vol:
+              type: string
+            volPercent:
+              type: string
+            symbol:
+              type: string
+            description:
+              type: string
+            bannerUrl:
+              type: string
+            nftImage:
+              type: string
+            ind:
+              type: number
+    SwapResponse:
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        value:
+          type: string
+        gas:
+          type: string
+        gasPrice:
+          type: string
+        data:
+          type: string
+        approveAddress:
+          type: string
+        transferData:
+          type: object
+          properties:
+            fromAddress:
+              type: string
+            fromTokenAddress:
+              type: string
+            fromTokenAmount:
+              type: string
+            fromChainId:
+              type: number
+            toChainId:
+              type: number
+            timestamp:
+              type: number
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
