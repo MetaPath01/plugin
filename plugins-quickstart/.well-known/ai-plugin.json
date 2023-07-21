@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "meta path for crypto query",
+  "name_for_model": "meta path",
+  "description_for_human": "Plugin for querying coins and nfts.",
+  "description_for_model": "Plugin for querying coins and nfts.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "http://104.250.52.77:5003/openapi.yaml",
+    "is_user_authenticated": false
+  },
+  "logo_url": "http://localhost:5003/logo.png",
+  "contact_email": "liu941125@gmail.com",
+  "legal_info_url": "http://example.com/legal"
+}
