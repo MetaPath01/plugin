@@ -1,0 +1,290 @@
+import json
+import quart
+import quart_cors
+from quart import request, Response
+import requests
+import util
+
+app = quart_cors.cors(quart.Quart(__name__))
+base_url = f'https://api.paths.finance'
+
+
+@app.route("/api/getBaseInfo", methods=['GET'])
+async def get_coin_list():
+    url = base_url + '/api/getBaseInfo'
+    try:
+        respone = requests.get(url)
+        respone.raise_for_status()
+        json_data = respone.json()
+        dct = json_data['data']['tokens'].keys()
+        res = {"support chains":"support following {}".format(','.join(dct)),
+               "introduction":"MetaPath is a revolutionary platform that simplifies cross-chain trades for both NFTs and Crypto. By offering a one-stop-shop for NFTs and crypto, MetaPath has made it easier than ever for users to navigate the complexities of the blockchain ecosystem. With its innovative Aggregate-&-Earn model for Web3, users can compare prices across the metaverse and pay less to get more. Whether you're a seasoned trader or a newcomer to the world of NFT and crypto, MetaPath is the perfect solution for anyone looking to streamline their NFT and cross-chain trading experience",
+               }
+        
+        
+        return Response(response=json.dumps(res), status=200)
+    except requests.exceptions.RequestException as e:
+        error_message = f'Error fetching data from API: {e}'
+        return Response(response=error_message, status=500)
+
+
+@app.route("/api/v2/meta/recentlyListed", methods=['GET'])
+async def get_recent_nfts_list():
+    url = base_url + '/api/v2/meta/recentlyListed'
+    try:
+        respone = requests.get(url)
+        respone.raise_for_status()
+        json_data = respone.json()['data']['assets']
+        for i in json_data:
+            name = i['name'].replace(' ', '%20')
+            i["purchaseUrl"]=f"https://paths.finance/#/collection?collectionid={i['id']}&name={i['name']}&contractAddress={i['contractAddress']}&ind={i['ind']}&source=path" 
+        print(json_data)
+        return Response(response=json.dumps(json_data), status=200)
+    except requests.exceptions.RequestException as e:
+        error_message = f'Error fetching data from API: {e}'
+        return Response(response=error_message, status=500) 
+
+
+@app.route("/api/v2/meta/topCollections", methods=['GET'])
+async def get_top_nfts_list():
+    url = base_url + '/api/v2/meta/topCollections'
+    try:
+        respone = requests.get(url)
+        respone.raise_for_status()
+        json_data = respone.json()['data']['lists']
+        for i in json_data:
+            name = i['name'].replace(' ', '%20')
+            i["purchaseUrl"]=f"https://paths.finance/#/collection?collectionid={i['id']}&name={}&contractAddress={i['contractAddress']}&ind={i['ind']}&source=path" 
+        print(json_data)
+        return Response(response=json.dumps(json_data), status=200)
+    except requests.exceptions.RequestException as e:
+        error_message = f'Error fetching data from API: {e}'
+        return Response(response=error_message, status=500) 
+
+
+@app.route("/api/v2/meta/getUserAssets", methods=['GET'])
+async def get_nfts_list_by_user():
+    owner = request.args.get('owner')
+    url = base_url + '/api/v2/meta/getUserAssets?owner={}'.format(owner)
+    try:
+        respone = requests.get(url)
+        respone.raise_for_status()
+        json_data = respone.json()['data']['assets']['nftInfos']
+        print(json_data)
+        return Response(response=json.dumps(json_data), status=200)
+    except requests.exceptions.RequestException as e:
+        error_message = f'Error fetching data from API: {e}'
+        return Response(response=error_message, status=500) 
+    
+
+@app.route("/api/exchangeRecord/getTransDetail", methods=["GET"])
+async def get_trans_detail():
+    hash = request.args.get('hash')
+    url = base_url + '/api/exchangeRecord/getTransDetail?hash={}'.format(hash)
+    try:
+        respone = requests.get(url)
+        respone.raise_for_status()
+        json_data = respone.json()
+        print(json_data)
+        res = {}
+        for i in json_data['data']:
+            res[i] = json_data['data'][i]
+        resp = json.dumps(res)
+        print(resp)
+        return Response(response=resp, status=200)
+    except requests.exceptions.RequestException as e:
+        error_message = f'Error fetching data from API: {e}'
+        print(error_message)
+        return Response(response=error_message, status=500)
+    
+
+def multi_quote():
+    try:
+        fromTokenAddress = request.args.get('fromTokenAddress')
+        toTokenAddress = request.args.get('toTokenAddress')
+        fromAddress = request.args.get('fromAddress')
+        toAddress = request.args.get('toAddress')
+        equipmentNo = request.args.get('equipmentNo')
+        fromTokenAmount = request.args.get('fromTokenAmount')
+        fromTokenChain =  request.args.get("from_chain"),
+        toTokenChain =  request.args.get("to_chain"),
+        url = base_url + '/api/multiQuotel'
+        params = {
+            'fromTokenAddress': fromTokenAddress,
+            'toTokenAddress': toTokenAddress,
+            'fromAddress': fromAddress,
+            'toAddress': toAddress,
+            'equipmentNo': equipmentNo,
+            'fromTokenAmount': fromTokenAmount,
+            'fromTokenChain': fromTokenChain,
+            'toTokenChain': toTokenChain,
+            'source': 'path-autogpt',
+            'slippage': 1
+        }
+        json_data = requests.get(url, params).json()
+        print(json_data)
+        if json_data['resCode'] != 100:
+            return Response(response="Error fetching data from API", status=json_data['resCode'])
+        res = {}
+        for i in json_data['data']:
+            res[i] = json_data['data'][i]
+        resp = json.dumps(res)
+        print(resp)
+        return Response(response=resp, status=200)
+    except requests.exceptions.RequestException as e:
+        error_message = f'Error fetching data from API: {e}'
+        print(error_message)
+        return Response(response=error_message, status=500)
+
+
+@app.route("/api/commonSwap", methods=["GET"])
+async def swap_new():
+    try:
+        url = base_url + '/api/multiQuote'
+        print(request)
+        fromTokenName = request.args.get('fromTokenName')
+        toTokenName = request.args.get('toTokenName')
+        user_address = request.args.get('wallet_address')
+        if not user_address:
+            user_address = '0x390BC0b43E8EeE998F64D555c008cF9E86E4a94b'
+        fromTokenAmount = request.args.get('fromTokenAmount')
+        fromTokenChain =  request.args.get("fromTokenChain")
+        toTokenChain =  request.args.get("toTokenChain")
+        equipmentNo = util.get_equipment_no(user_address)
+        print(fromTokenName + "\n" + fromTokenChain)
+        print(toTokenName + "\n" + toTokenChain)
+        #fromTokenInfo = util.get_coin_info(fromTokenName, fromTokenChain)
+        fromTokenInfo = get_coin_info(fromTokenName, fromTokenChain)
+        print(fromTokenInfo)
+        #toTokenInfo = util.get_coin_info(toTokenName, toTokenChain)
+        toTokenInfo = get_coin_info(toTokenName, toTokenChain)
+        print(toTokenInfo)
+        amount = str(int(fromTokenAmount) * (10 ** fromTokenInfo['decimals']))
+        params = {
+            'fromTokenAddress': fromTokenInfo['address'],
+            'toTokenAddress': toTokenInfo['address'],
+            'fromAddress': user_address,
+            'toAddress': user_address,
+            'equipmentNo': equipmentNo,
+            'fromTokenAmount': amount,
+            'fromTokenChain': fromTokenChain,
+            'toTokenChain': toTokenChain,
+            'slippage': 1,
+            'source': 'path-autogpt'
+        }
+        quote_infos = requests.get(url, params).json()['data']
+        quote_infos = quote_infos['txData']
+        rate_info = {}
+        for quote_info in quote_infos:
+            if fromTokenChain == toTokenChain and quote_info and quote_info['dex'] == 'Aggregator':
+                rate_info = quote_info
+            if fromTokenChain != toTokenChain and quote_info and quote_info['dex'] == 'Aggregator':
+                rate_info = quote_info
+        if not rate_info:
+            raise ValueError('get quote info empty')
+        res = {
+            'fromTokenAddress': fromTokenInfo['address'],
+            'toTokenAddress': toTokenInfo['address'],
+            'fromTokenChain': fromTokenChain,
+            'toTokenChain': toTokenChain,
+            'receiveTokenAmount':rate_info['receiveTokenAmount'],
+            'gasfee':rate_info['fee']}
+        
+        resp = json.dumps(res)
+        '''swap_info = swap(
+            fromTokenInfo['address'],
+            toTokenInfo['address'],
+            user_address,
+            rate_info['amountOutMin'],
+            rate_info['dex'],
+            fromTokenChain,
+            toTokenChain,
+            amount,
+            equipmentNo
+        )
+        if 'txData' in swap_info:
+            swap_info['txData']['receiveTokenAmount'] = rate_info['receiveTokenAmount']
+            resp = json.dumps(rate_info)
+            return Response(response=resp, status=200)
+        else:
+            return swap_info'''
+        return Response(response=resp, status=200)
+    except Exception as e:
+        error_message = f'Error fetching data from API: {e}'
+        print(error_message)
+        return Response(response=error_message, status=500)
+    
+
+def swap(fromTokenAddress, toTokenAddress, fromAddress, amountOutMin,
+        dex, fromTokenChain, toTokenChain, amount, equipmentNo):
+    try:
+        url = base_url + '/api/commonSwap'     
+        params = {
+            'fromTokenAddress': fromTokenAddress,
+            'toTokenAddress': toTokenAddress,
+            'fromAddress': fromAddress,
+            'toAddress': fromAddress,
+            "amountOutMin": amountOutMin,
+            "dex": dex,
+            'equipmentNo': equipmentNo,
+            'fromTokenAmount': amount,
+            'fromTokenChain': fromTokenChain,
+            'toTokenChain': toTokenChain,
+            'slippage': 1,
+            'isNoGas': False,
+            'source': 'path-autogpt'
+        }
+        headers = {'content-type': 'application/json'}
+        respone = requests.post(url, json=params, headers=headers)
+        json_data = respone.json()
+        if json_data['resCode'] != "100":
+            return json_data
+        print(json_data)
+        res = {}
+        for i in json_data['data']:
+            res[i] = json_data['data'][i]
+        return res
+    except requests.exceptions.RequestException as e:
+        error_message = f'Error fetching data from API: {e}'
+        print(error_message)
+        return Response(response=error_message, status=500)
+    
+def get_coin_info(tokenName, chainName):
+    url = base_url + '/api/getBaseInfo?chain={}'.format(chainName.lower())
+    try:
+        tokens_data = requests.get(url).json()['data']["tokens"]
+        for tokens in tokens_data:
+            if tokenName.upper() == tokens['symbol']:
+                return tokens
+    except requests.exceptions.RequestException as e:
+        error_message = f'Error fetching data from API: {e}'
+        print(error_message)
+        return {}
+    
+
+@app.route("/logo.png", methods=["GET"])   
+async def plugin_logo():
+  filename = 'logo.png'
+  return await quart.send_file(filename, mimetype='image/png')
+
+@app.route("/.well-known/ai-plugin.json", methods=["GET"])   
+async def plugin_manifest():
+  host = request.headers['Host']
+  with open("manifest.json") as f:
+    text = f.read()
+    text = text.replace("PLUGIN_HOSTNAME", f"https://{host}")
+    return quart.Response(text, mimetype="text/json")
+
+@app.route("/openapi.yaml", methods=["GET"])   
+async def openapi_spec():
+  host = request.headers['Host']
+  with open("./plugins-quickstart/openapi.yaml") as f:
+    text = f.read()
+    text = text.replace("PLUGIN_HOSTNAME", f"https://{host}")
+    return quart.Response(text, mimetype="text/yaml")   
+
+def main():
+    app.run(debug=True, host="0.0.0.0", port=5003)
+
+if __name__ == "__main__":
+    main()
