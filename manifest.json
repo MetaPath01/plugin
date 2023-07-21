@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "meta path for crypto query",
+  "name_for_model": "meta_path",
+  "description_for_human": "querying coins info and nfts.",
+  "description_for_model": "querying coins info and nfts.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://chatgpt-plugin.paths.finance/openapi.yaml",
+    "is_user_authenticated": false
+  },
+  "logo_url": "https://chatgpt-plugin.paths.finance/logo.png",
+  "contact_email": "liu941125@gmail.com",
+  "legal_info_url": "https://paths.finance/us/legal.html"
+}
