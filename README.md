@@ -23,6 +23,7 @@ To get a list of supported chains:
 ```javascript
 MetaPath.get_coin_lists();
 ```
+![1691113035097](https://github.com/MetaPath01/plugin/assets/95208869/ca0be889-04f9-427d-b703-da17384b8f5c)
 
 ---
 
