@@ -35,6 +35,7 @@ To get a list of recently listed NFTs:
 ```javascript
 MetaPath.get_recent_nfts();
 ```
+![image](https://github.com/MetaPath01/plugin/assets/95208869/2feb3440-1ad6-4be6-80d5-9ade332a01c7)
 
 #### 2.2 Top NFT Collections
 
@@ -43,6 +44,7 @@ To get a list of top NFT collections:
 ```javascript
 MetaPath.get_top_nfts();
 ```
+![image](https://github.com/MetaPath01/plugin/assets/95208869/85350374-a72e-4bc5-979c-67ea0cc1096d)
 
 #### 2.3 NFT Assets Owned by a User
 
@@ -80,6 +82,8 @@ Replace the placeholders with the appropriate values:
 - `chain_name_here`: Name of the chain.
 
 ---
+![image](https://github.com/MetaPath01/plugin/assets/95208869/4112c708-4db7-4b74-8b14-1f23db391515)
+
 
 ### 4. Transaction Details <a name="transaction-details"></a>
 
@@ -94,6 +98,8 @@ MetaPath.get_trans_detail({
 Replace `transaction_hash_here` with the desired transaction hash.
 
 ---
+![image](https://github.com/MetaPath01/plugin/assets/95208869/38526588-6ae3-4553-8152-67b77a0313bd)
+
 
 ### Conclusion
 
